@@ -34,7 +34,12 @@ apps:
       DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-rfid-llrp-go/res"
     daemon: simple
     plugs: [network, network-bind]
-
+slots:
+  device-profiles-slot:
+    interface: content
+    content: device-profiles
+    write:
+    - $SNAP_DATA/config/device-rfid-llrp-go/res
 parts:
   go:
     plugin: nil
