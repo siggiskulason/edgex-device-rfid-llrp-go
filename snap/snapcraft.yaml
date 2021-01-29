@@ -23,6 +23,27 @@ confinement: strict
 # delhi: 0, edinburgh: 1, fuji: 2, geneva: 3
 epoch: 3
 
+architectures:
+    - build-on: arm64
+    - build-on: amd64
+
+passthrough:
+  hooks:
+    connect-plug-network-observe:
+      command-chain:
+        - snap/command-chain/snapcraft-runner
+      plugs:
+        - network
+        - network-observe
+        - network-control
+    connect-plug-network-control:
+      command-chain:
+        - snap/command-chain/snapcraft-runner
+      plugs:
+        - network
+        - network-observe
+        - network-control
+
 apps:
    device-rfid-llrp-go:
     adapter: none
@@ -34,6 +55,16 @@ apps:
       DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-rfid-llrp-go/res"
     daemon: simple
     plugs: [network, network-bind]
+
+   discover-readers:
+    adapter: none
+    command-chain:
+        - snap/command-chain/snapcraft-runner
+    command: bin/setup.sh
+    plugs:
+      - network
+      - network-observe
+      - network-control
 slots:
   device-profiles-slot:
     interface: content
@@ -73,6 +104,16 @@ parts:
       tar -C $SNAPCRAFT_STAGE -xf go*.tar.gz --strip-components=1
     prime:
       - "-*"
+  config-common:
+    plugin: dump
+    source: snap/local/runtime-helpers
+
+   # required for device discovery
+  static-packages:
+    source: snap/local
+    plugin: nil
+    stage-packages:
+      - curl
 
   device-rfid-llrp-go:
     source: .
